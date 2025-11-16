@@ -7,31 +7,28 @@ test = {
         {
           'code': r"""
           >>> is_always_roll(always_roll_5)
-          2dd55144519866b51ac70638e37b5388
-          # locked
+          True
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         },
         {
           'code': r"""
           >>> is_always_roll(always_roll(3))
-          2dd55144519866b51ac70638e37b5388
-          # locked
+          True
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         },
         {
           'code': r"""
           >>> is_always_roll(catch_up)
-          c40a7c3c767f2fb1f2f369dabf5379f5
-          # locked
+          False
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         },
         {

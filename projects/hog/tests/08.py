@@ -5,7 +5,7 @@ test = {
     {
       'cases': [
         {
-          'answer': '3aecc002acdd55b90bdf48d167af4901',
+          'answer': 'It takes in a function as an argument',
           'choices': [
             'It contains a nested function',
             'It calls a function that is not itself',
@@ -13,19 +13,19 @@ test = {
             'It uses the *args keyword'
           ],
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False,
           'question': 'What is one reason that make_averaged is a higher order function?'
         },
         {
-          'answer': '3d95d25ee7e350e316499577c8bd0d99',
+          'answer': 'An arbitrary amount, which is why we need to use *args to call it',
           'choices': [
             'None',
             'Two',
             'An arbitrary amount, which is why we need to use *args to call it'
           ],
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False,
           'question': 'How many arguments does the function passed into make_averaged take?'
         }
@@ -41,11 +41,10 @@ test = {
           >>> averaged_dice = make_averaged(dice, 1000)
           >>> # Average of calling dice 1000 times
           >>> averaged_dice()
-          af48b6e78417ff83f674305e5faaf184
-          # locked
+          3.75
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         },
         {
@@ -55,11 +54,10 @@ test = {
           >>> # Average of calling roll_dice 1000 times
           >>> # Enter a float (e.g. 1.0) instead of an integer
           >>> averaged_roll_dice(2, dice)
-          db8547ec657de21a7de51efb79db0bc8
-          # locked
+          6.0
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         }
       ],
@@ -84,7 +82,7 @@ test = {
           50.0
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         },
         {
@@ -95,7 +93,7 @@ test = {
           1.0
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         },
         {
@@ -106,7 +104,7 @@ test = {
           5.0
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         }
       ],
