@@ -85,8 +85,17 @@ def multiple(a, b):
     >>> multiple(14, 21)
     42
     """
-    "*** YOUR CODE HERE ***"
-
+    m, mul = 2, 1
+    while m <= min(a, b):
+        if a % m == 0 and b % m == 0:
+            a, b = a // m, b // m
+            mul = mul * m
+        m += 1
+    if m == 2:
+        return a * b
+    else: 
+        mul = mul * a * b
+        return mul
 
 
 def cycle(f1, f2, f3):
@@ -115,5 +124,22 @@ def cycle(f1, f2, f3):
     >>> do_two_cycles(1)
     19
     """
-    "*** YOUR CODE HERE ***"
+    def g(n):
+        def h(x):
+            m, y= 2, 0
+            if n == 0:
+                return x
+            else:
+                y = f1(x)
+                while m <= n:
+                    if m % 3 == 1:
+                        y = f1(y)
+                    if m % 3 == 2:
+                        y = f2(y)
+                    if m % 3 == 0:
+                        y = f3(y)
+                    m += 1
+                return y
+        return h
+    return g
 
