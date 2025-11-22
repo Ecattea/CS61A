@@ -184,6 +184,25 @@ def count_dollars_upward(total):
         return without_dollar_bill + with_dollar_bill
     return constrained_count(total, 1)
 
+def knapsack(weights, values, c):
+    """
+    >>> w = [2, 6, 3, 3]
+    >>> v = [1, 5, 3, 3]
+    >>> knapsack(w, v, 6)
+    6
+    """
+    n = len(weights)
+    def helper(i, remaining):
+        if i == n or remaining <= 0:
+            return 0
+        w = weights[i]
+        v = values[i]
+        if w > remaining:
+            return helper(i + 1, remaining)
+        without_i = helper(i + 1, remaining)
+        with_i = helper(i + 1, remaining - w)
+        return max(without_i + with_i)
+    return helper(0, c)
 
 def print_move(origin, destination):
     """Print instructions to move a disk."""
@@ -217,8 +236,13 @@ def move_stack(n, start, end):
     Move the top disk from rod 1 to rod 3
     """
     assert 1 <= start <= 3 and 1 <= end <= 3 and start != end, "Bad start/end"
-    "*** YOUR CODE HERE ***"
-
+    if n == 1:
+        print_move(start, end)
+    else:
+        mid = 6 - start - end
+        move_stack(n-1, start, mid)
+        print_move(start, end)
+        move_stack(n-1, mid, end)
 
 from operator import sub, mul
 
@@ -233,5 +257,5 @@ def make_anonymous_factorial():
     ...     ['Assign', 'AnnAssign', 'AugAssign', 'NamedExpr', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
+    return (lambda f: lambda k: f(f, k))(lambda f, k: k if k == 1 else mul(k, f(f, sub(k, 1))))
 
