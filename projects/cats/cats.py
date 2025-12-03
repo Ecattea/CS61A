@@ -280,7 +280,7 @@ def minimum_mewtations(typed: str, source: str, limit: int) -> int:
 
 
 # Ignore the line below
-minimum_mewtations = count(minimum_mewtations)
+#minimum_mewtations = count(minimum_mewtations)
 
 
 def final_diff(typed: str, source: str, limit: int) -> int:
@@ -454,7 +454,7 @@ def run_typing_test(topics):
 
         elapsed = (datetime.now() - start).total_seconds()
         print("Nice work!")
-        print("Words per minute:", wpm(typed, elapsed))
+        print("Words per minute:", wpm(typed, elapsed)) # type: ignore
         print("Accuracy:        ", accuracy(typed, source))
 
         print("\nPress enter/return for the next paragraph or type q to quit.")
