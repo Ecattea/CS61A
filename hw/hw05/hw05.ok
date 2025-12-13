@@ -1,0 +1,28 @@
+{
+    "name": "Homework 5",
+    "endpoint": "cal/cs61a/fa25/hw05",
+    "src": [
+        "hw05.py"
+    ],
+    "tests": {
+        "hw*.py": "doctest",
+        "tests/*.py": "ok_test"
+    },
+    "default_tests": [
+        "midsem_survey",
+        "hailstone",
+        "merge",
+        "stair_ways",
+        "yield_paths"
+    ],
+    "protocols": [
+        "restore",
+        "file_contents",
+        "analytics",
+        "help",
+        "followup",
+        "unlock",
+        "grading",
+        "backup"
+    ]
+}
