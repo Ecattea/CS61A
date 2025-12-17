@@ -5,7 +5,7 @@ test = {
     {
       'cases': [
         {
-          'answer': '9f40b97857ecfadf1e7ad1c7965f2464',
+          'answer': 'ContainerAnt class',
           'choices': [
             'ContainerAnt class',
             'Insect class',
@@ -13,7 +13,7 @@ test = {
             'Ant class'
           ],
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False,
           'question': 'Where does a ProtectorAnt directly inherit all of its instance attributes from?'
         }
@@ -28,14 +28,12 @@ test = {
           >>> # Testing ProtectorAnt parameters
           >>> protector = ProtectorAnt()
           >>> ProtectorAnt.food_cost
-          c9452203eb0b0f0bd2454586a6c2fc5c
-          # locked
+          4
           >>> protector.health
-          20d533d3e06345c8bd7072212867f2d1
-          # locked
+          2
           """,
           'hidden': False,
-          'locked': True,
+          'locked': False,
           'multiline': False
         }
       ],
