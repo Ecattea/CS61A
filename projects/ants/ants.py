@@ -53,6 +53,7 @@ class Insect:
     next_id = 0  # Every insect gets a unique id number
     damage = 0
     # ADD CLASS ATTRIBUTES HERE
+    is_waterproof = False
 
     def __init__(self, health: int, place: Place | None = None):
         """Create an Insect with a health amount and a starting PLACE."""
@@ -113,6 +114,7 @@ class Ant(Insect):
 
     def __init__(self, health: int = 1):
         super().__init__(health)
+        self.damage_doubled = False
 
     def can_contain(self, other: Ant) -> bool:
         return False
@@ -150,7 +152,10 @@ class Ant(Insect):
     def double(self):
         """Double this ants's damage, if it has not already been doubled."""
         # BEGIN Problem 12
-        "*** YOUR CODE HERE ***"
+        if self.damage_doubled:
+            return
+        self.damage *= 2
+        self.damage_doubled = True
         # END Problem 12
 
 
@@ -412,11 +417,20 @@ class Water(Place):
         """Add an Insect to this place. If the insect is not waterproof, reduce
         its health to 0."""
         # BEGIN Problem 10
-        
+        if not insect.is_waterproof:
+            insect.reduce_health(insect.health)
+        else:
+            super().add_insect(insect)
         # END Problem 10
 
 # BEGIN Problem 11
-# The ScubaThrower class
+class ScubaThrower(ThrowerAnt):
+    """A ScubaThrower should not lose its health when placed in Water."""
+
+    name = 'Scuba'
+    implemented = True
+    food_cost = 6
+    is_waterproof = True
 # END Problem 11
 
 
@@ -427,15 +441,37 @@ class QueenAnt(ThrowerAnt):
     food_cost = 7
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem 12
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
+    has_true_queen = False
     # END Problem 12
+
+    def __init__(self, health: int = 1):
+        super().__init__(health)
+        if not QueenAnt.has_true_queen:
+            self.is_true_queen = True
+            QueenAnt.has_true_queen = True
+        else:
+            self.is_true_queen = False
+
+    def add_to(self, place: Place):
+        super().add_to(place)
+        if not self.is_true_queen:
+            Insect.reduce_health(self, self.health)
 
     def action(self, gamestate: GameState):
         """A queen ant throws a leaf, but also doubles the damage of ants
         in her tunnel.
         """
         # BEGIN Problem 12
-        "*** YOUR CODE HERE ***"
+        if not self.is_true_queen or self.place is None:
+            return
+        super().action(gamestate)
+        current = self.place.exit
+        while current is not None and not current.is_hive:
+            ant = current.ant
+            if ant is not None:
+                self._double_ant(ant)
+            current = current.exit
         # END Problem 12
 
     def reduce_health(self, amount: float):
@@ -443,8 +479,19 @@ class QueenAnt(ThrowerAnt):
         remaining, signal the end of the game.
         """
         # BEGIN Problem 12
-        "*** YOUR CODE HERE ***"
+        if not self.is_true_queen:
+            Insect.reduce_health(self, amount)
+            return
+        prev_health = self.health
+        super().reduce_health(amount)
+        if prev_health > 0 and self.health <= 0:
+            ants_lose()
         # END Problem 12
+
+    def _double_ant(self, ant: Ant):
+        ant.double()
+        if getattr(ant, 'is_container', False) and getattr(ant, 'ant_contained', None):
+            self._double_ant(ant.ant_contained)
 
 
 ################
@@ -546,7 +593,7 @@ class Bee(Insect):
 
     name = 'Bee'
     damage = 1
-
+    is_waterproof = True
 
     def sting(self, ant: Ant):
         """Attack an ANT, reducing its health by 1."""
