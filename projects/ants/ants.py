@@ -107,9 +107,10 @@ class Ant(Insect):
     implemented = False  # Only implemented Ant classes should be instantiated
     food_cost = 0
     is_container = False
+    blocks_path = True
     # ADD CLASS ATTRIBUTES HERE
     # BEGIN Problem 8a
-    
+
     # END Problem 8a
 
     def __init__(self, health: int = 1):
@@ -504,12 +505,30 @@ class SlowThrower(ThrowerAnt):
     name = 'Slow'
     food_cost = 6
     # BEGIN Problem EC 1
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem EC 1
 
     def throw_at(self, target: Bee | None):
         # BEGIN Problem EC 1
-        "*** YOUR CODE HERE ***"
+        if target is None:
+            return
+
+        if not hasattr(target, "slow_cooldown") or target.slow_cooldown <= 0:
+            target.original_action = target.action
+
+            def slowed_action(gamestate, target_ref=target):
+                if target_ref.slow_cooldown > 0:
+                    if gamestate.time % 2 == 0:
+                        target_ref.original_action(gamestate)
+                    target_ref.slow_cooldown -= 1
+                    if target_ref.slow_cooldown == 0:
+                        target_ref.action = target_ref.original_action
+                else:
+                    target_ref.original_action(gamestate)
+
+            target.action = slowed_action
+
+        target.slow_cooldown = 5
         # END Problem EC 1
 
 
@@ -519,12 +538,13 @@ class ScaryThrower(ThrowerAnt):
     name = 'Scary'
     food_cost = 6
     # BEGIN Problem EC 2
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem EC 2
 
     def throw_at(self, target: Bee | None):
         # BEGIN Problem EC 2
-        "*** YOUR CODE HERE ***"
+        if target is not None:
+            target.scare(2)
         # END Problem EC 2
 
 
@@ -536,12 +556,16 @@ class NinjaAnt(Ant):
     food_cost = 5
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem EC 3
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
+    blocks_path = False
     # END Problem EC 3
 
     def action(self, gamestate: GameState):
         # BEGIN Problem EC 3
-        "*** YOUR CODE HERE ***"
+        if self.place is None:
+            return
+        for bee in list(self.place.bees):
+            bee.reduce_health(self.damage)
         # END Problem EC 3
 
 
@@ -552,7 +576,7 @@ class LaserAnt(ThrowerAnt):
     food_cost = 10
     # OVERRIDE CLASS ATTRIBUTES HERE
     # BEGIN Problem EC 4
-    implemented = False   # Change to True to view in the GUI
+    implemented = True   # Change to True to view in the GUI
     # END Problem EC 4
 
     def __init__(self, health: int = 1):
@@ -561,12 +585,33 @@ class LaserAnt(ThrowerAnt):
 
     def insects_in_front(self) -> dict[Bee, int]:
         # BEGIN Problem EC 4
-        return {}
+        insects = {}
+        if self.place is None:
+            return insects
+
+        current = self.place
+        distance = 0
+        while current is not None and not current.is_hive:
+            for bee in current.bees:
+                insects[bee] = distance
+
+            ant = current.ant
+            if ant is not None and ant is not self:
+                insects[ant] = distance
+                if getattr(ant, "is_container", False) and getattr(ant, "ant_contained", None):
+                    if ant.ant_contained is not self:
+                        insects[ant.ant_contained] = distance
+
+            current = current.entrance
+            distance += 1
+
+        return insects
         # END Problem EC 4
 
     def calculate_damage(self, distance: int) -> float:
         # BEGIN Problem EC 4
-        return 0
+        damage = 2 - (0.25 * distance) - (0.0625 * self.insects_shot)
+        return max(0, damage)
         # END Problem EC 4
 
     def action(self, gamestate: GameState):
@@ -611,7 +656,9 @@ class Bee(Insect):
         """Return True if this Bee cannot advance to the next Place."""
         # Special handling for NinjaAnt
         # BEGIN Problem EC 3
-        return self.place is not None and self.place.ant is not None
+        if self.place is None or self.place.ant is None:
+            return False
+        return getattr(self.place.ant, "blocks_path", True)
         # END Problem EC 3
 
     def action(self, gamestate: GameState):
@@ -644,7 +691,52 @@ class Bee(Insect):
         go backwards LENGTH times.
         """
         # BEGIN Problem EC 2
-        "*** YOUR CODE HERE ***"
+        if getattr(self, "scared_once", False):
+            return
+        self.scared_once = True
+        self.scare_cooldown = length
+        self.scare_original_action = self.action
+
+        def scared_action(gamestate, bee_ref=self):
+            slow_active = hasattr(bee_ref, "slow_cooldown") and bee_ref.slow_cooldown > 0
+            active_action_is_self = bee_ref.action is scared_action
+
+            if bee_ref.scare_cooldown > 0:
+                if slow_active and gamestate.time % 2 == 1:
+                    if active_action_is_self:
+                        bee_ref.slow_cooldown -= 1
+                        if bee_ref.slow_cooldown == 0 and hasattr(bee_ref, "original_action"):
+                            bee_ref.scare_original_action = bee_ref.original_action
+                    return
+
+                if bee_ref.blocked() and bee_ref.place and bee_ref.place.ant:
+                    bee_ref.sting(bee_ref.place.ant)
+                else:
+                    if bee_ref.place and bee_ref.place.entrance and not bee_ref.place.entrance.is_hive:
+                        bee_ref.move_to(bee_ref.place.entrance)
+
+                bee_ref.scare_cooldown -= 1
+                if slow_active and active_action_is_self:
+                    bee_ref.slow_cooldown -= 1
+                    if bee_ref.slow_cooldown == 0 and hasattr(bee_ref, "original_action"):
+                        bee_ref.scare_original_action = bee_ref.original_action
+
+                if bee_ref.scare_cooldown == 0:
+                    if active_action_is_self:
+                        bee_ref.action = bee_ref.scare_original_action
+                    else:
+                        if hasattr(bee_ref, "original_action"):
+                            bee_ref.original_action = bee_ref.scare_original_action
+                return
+
+            if active_action_is_self:
+                bee_ref.action = bee_ref.scare_original_action
+            else:
+                if hasattr(bee_ref, "original_action"):
+                    bee_ref.original_action = bee_ref.scare_original_action
+            bee_ref.scare_original_action(gamestate)
+
+        self.action = scared_action
         # END Problem EC 2
 
 
